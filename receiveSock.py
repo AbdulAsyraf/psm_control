@@ -11,8 +11,10 @@ s.listen(0)
 locations = {
     "d70574a2680b": 'bedroom',
     "d90776a46a0d": 'bathroom',
-    "23784e38f373": 'livingroom',
-    "26eb82a5e8d9": 'kitchen'
+    # "23784e38f373": 'livingroom',
+    # "26eb82a5e8d9": 'kitchen',
+    "148c259dee68": 'playroom',
+    "0fbe9e163089": 'livingroom'
 }
 
 def write_json(data, filename):
@@ -40,7 +42,7 @@ while True:
             except KeyError:
                 pass
 
-    print("Closing connection")
+    # print("Closing connection")
     client.close()
 
     for x in range(len(distances)):
@@ -54,7 +56,11 @@ while True:
     entryWeek = int(now.strftime("%U")) % 7
     timeFile = str(entryWeek) + now.strftime("-%d-%m") + ".json"
 
-    entry = dict(masa=timeentry, loc=addresses[index])
+    try:
+        entry = dict(masa=timeentry, loc=addresses[index])
+    except NameError:
+        entry = dict(masa=timeentry, loc="not found")
+
     print(entry)
     try:
         with open(timeFile) as json_file:
