@@ -58,7 +58,7 @@ while True:
 
     try:
         entry = dict(masa=timeentry, loc=addresses[index])
-    except NameError:
+    except (NameError, IndexError):
         entry = dict(masa=timeentry, loc="not found")
 
     print(entry)
