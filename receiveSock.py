@@ -8,7 +8,14 @@ s.bind(('0.0.0.0', 8090))
 
 s.listen(0)
 
-def write_json(data, filename = 'data.json'):
+locations = {
+    "d70574a2680b": 'bedroom',
+    "d90776a46a0d": 'bathroom',
+    "23784e38f373": 'livingroom',
+    "26eb82a5e8d9": 'kitchen'
+}
+
+def write_json(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
@@ -26,31 +33,15 @@ while True:
             break
 
         else:
-            # print(content.decode("utf-8"))
-            # stuff.append(content.decode("utf-8"))
             strrr = content.decode("utf-8")
-            addresses.append(strrr[:12])
-            distances.append(strrr[12:])
-            # print(strrr[:12])
-            # print(strrr[12:])
+            try:
+                addresses.append(locations[strrr[:12]])
+                distances.append(strrr[12:])
+            except KeyError:
+                pass
 
-    print("Closing connection\n")
+    print("Closing connection")
     client.close()
-
-    # for x in range(len(stuff)):
-    #     if x%2 == 1:
-    #         distances.append(int(stuff[x]))
-    #         print("RSSI: ", stuff[x])
-    #     else:
-    #         addresses.append(stuff[x])
-    #         print("Address: ", stuff[x])
-
-    for x in range(len(addresses)):
-        print("Address: ", addresses[x])
-        print("RSSI: ", distances[x])
-
-    # for x in stuff:
-    #     print(x)
 
     for x in range(len(distances)):
         if x == 0 or distances[x] < shortest:
@@ -58,20 +49,26 @@ while True:
             index = x
     
     now = datetime.now()
-    timeentry = now.strftime("%d-%m-%Y-%H-%M")
-    # timeentry = now.day + "-" + now.month + "-" + now.year + " " + now.hour + ":" + now.minute
+    timeentry = now.strftime("%H-%M")
 
-    print("Closest beacon is ", addresses[index])
+    entryWeek = int(now.strftime("%U")) % 7
+    timeFile = str(entryWeek) + now.strftime("-%d-%m") + ".json"
 
     entry = dict(masa=timeentry, loc=addresses[index])
     print(entry)
+    try:
+        with open(timeFile) as json_file:
+            data = json.load(json_file)
+            temp = data['entry']
+            temp.append(entry)
+    except:
+        data = {
+            'entry':[
+                {
+                    'masa': timeentry,
+                    'loc': addresses[index]
+                }
+            ]
+        }
 
-    with open('data.json') as json_file:
-        data = json.load(json_file)
-
-        temp = data['entry']
-
-        temp.append(entry)
-
-    write_json(data)
-
+    write_json(data, timeFile)
